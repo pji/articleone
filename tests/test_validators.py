@@ -65,6 +65,37 @@ class ValTextTestCase(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
+class ValWhitelist(unittest.TestCase):
+    def test__val_whitelist__valid(self):
+        """validators.val_whitelist: Given a whitelist and a 
+        value, if the value is in the whitelist it is valid, 
+        and the function should return it.
+        """
+        expected = 'spam'
+        
+        whitelist = ['spam', 'eggs', 'bacon']
+        value = 'spam'
+        actual = v.val_whitelist(None, value, whitelist)
+        
+        self.assertEqual(expected, actual)
+    
+    def test__val_whitelist__invalid(self):
+        """validators.val_whitelist: Given a whitelist and a 
+        value, if the value is not in the whitelist it is invalid, 
+        and the function should raise a ValueError exception.
+        """
+        expected = ValueError
+        
+        class Spam:
+            msg = '{}'
+        obj = Spam()
+        value = 'baked beans'
+        whitelist = ['spam', 'eggs', 'bacon']
+        
+        with self.assertRaises(expected):
+            actual = v.val_whitelist(obj, value, whitelist)
+
+
 class DescriptorsTestCase(unittest.TestCase):
     def test_Text(self):
         """validators.Text: The descriptor should normalize the 

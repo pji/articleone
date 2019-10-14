@@ -9,6 +9,7 @@ import unicodedata as ucd
 
 from articleone.model import valfactory
 
+
 # Validator functions.
 def val_text(self, value, charset='utf_8', form='NFC'):
     """Normalize and validate text data."""
@@ -21,6 +22,14 @@ def val_text(self, value, charset='utf_8', form='NFC'):
     else:
         value = str(value)
     return ucd.normalize(form, value)
+
+
+def val_whitelist(self, value, whitelist):
+    """Validate the value is whitelisted."""
+    if value not in whitelist:
+        reason = 'not an allowed value'
+        raise ValueError(self.msg.format(reason))
+    return value
 
 
 # Validating descriptors.
