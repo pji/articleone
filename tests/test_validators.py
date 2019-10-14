@@ -63,4 +63,20 @@ class ValTextTestCase(unittest.TestCase):
         text = '\u0061\u0301'
         actual = v.val_text(None, text)
         self.assertEqual(expected, actual)
+
+
+class DescriptorsTestCase(unittest.TestCase):
+    def test_Text(self):
+        """validators.Text: The descriptor should normalize the 
+        given value to a string and, if valid, assign it to the 
+        protected attribute.
+        """
+        expected = 'spam'
         
+        class Eggs:
+            attr = v.Text()
+        obj = Eggs()
+        obj.attr = expected
+        actual = obj.attr
+        
+        self.assertEqual(expected, actual) 
