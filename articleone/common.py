@@ -4,7 +4,7 @@ common
 
 The module contains the basic classes used in articleone.
 """
-from functools import partial
+from lxml import etree
 
 from articleone import model as model
 from articleone import validators as valid
@@ -57,3 +57,9 @@ class Member:
         name = self.__class__.__name__
         return (f'{name}({self.last_name!r}, {self.first_name!r}, '
                 f'{self.party!r})')
+
+
+# Common utilities.
+def parse_xml(text:str):
+    """Parse the given string as XML."""
+    return etree.fromstring(text)

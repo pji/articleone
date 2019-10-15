@@ -6,9 +6,25 @@ This module contains the test for the articleone.common module.
 """
 import unittest
 
+from lxml import etree
+
 from articleone import common as com
 
 
+# Test data utilities.
+def build_test_xml():
+    """Build XML for test data."""
+    root = etree.Element('book')
+    child1 = etree.SubElement(root, 'spam')
+    child1.text = 'foo'
+    child2 = etree.SubElement(root, 'eggs')
+    child2.text = 'bar'
+    child3 = etree.SubElement(root, 'bacon')
+    child3.text = 'baz'
+    return root
+
+ 
+# Tests.
 class ValPartyTestCase(unittest.TestCase):
     def test__val_party__valid(self):
         """common.val_party: Given a value, if the value is a valid 
@@ -124,3 +140,25 @@ class MemberTestCase(unittest.TestCase):
         actual = mbr.__repr__()
         
         self.assertEqual(expected, actual)
+
+
+class ParseXmlTestCase(unittest.TestCase):
+    def test__validXml(self):
+        """common.parse_xml: Given a string containing XML, the 
+        function should return an lxml.etree.Element representing 
+        the XML in the string.
+        """
+        expected = build_test_xml()
+        
+        text = ('<book>'
+                '   <spam>foo</spam>'
+                '   <eggs>bar</eggs>'
+                '   <bacon>baz</bacon>'
+                '</book>')
+        actual = com.parse_xml(text)
+        
+        # lxml.etree._Element does not define __eq__, so we have 
+        # to manually compare the attributes of the _Elements.
+        for a, b in zip(expected, actual):
+            self.assertEqual(a.tag, b.tag)
+            self.assertEqual(a.text, b.text)

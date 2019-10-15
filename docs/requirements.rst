@@ -44,4 +44,48 @@ The first thing to work through is the data model. If I'm going to
 go get data, I need somewhere to put it. The pattern I'm going to 
 use here is going to be based on the pattern in *Fluent Python*. 
 The technical requirements here can be seen in the test cases in 
-the tests/test_model module.
+the following modules:
+
+* tests/test_model
+* tests/test_validators
+* tests/test_common
+* tests/test_senate
+
+Next up is the design for the HTTP client to pull the data. I'm 
+not really calling APIs here. I'm more or less just scraping. So, 
+I probably don't need anything super complex here. I also don't 
+have to worry about authentication. There is an implementation of 
+a asynchronous HTTP client in *Fluent Python*, so maybe I can start 
+with that?
+
+Seriously, if you haven't read *Fluent Python* by Luciano Ramalho, 
+you should.
+
+Anyway, that pattern is probably more complex than I need to start 
+with, so I'll just go with the client example from the aiohttp site 
+for now. Look for the detailed requirements here:
+
+* tests/test_http
+
+Since I'm writing this starting from the data model rather than 
+from the connection, it's probably worth walking through the steps 
+involved in the connection to figure out how to break it down into 
+functions. Those steps are:
+
+1. Make the connection to senate.gov
+2. Get the XML file
+3. Parse the XML file
+4. Build the Senator objects
+
+That probably breaks down into the functions:
+
+1. http.fetch
+2. senate._fetch_senate_xml
+3. common.parse_xml
+4. senate.Senator.from_xml
+
+This will all need to be asynchronous in order for it to matter 
+that I'm using aiohttp here. Though, the asynchronicity here isn't 
+all that useful since the senate.xml file is just one HTTP call. 
+But I probably want it to be able to go get the House information 
+while it's waiting on the call for senate.xml.
