@@ -7,7 +7,12 @@ The module is a client for information on the U.S. Senate.
 from lxml import etree
 
 from articleone import common
+from articleone import http
 from articleone import model
+
+
+# Configuration.
+URL = 'https://www.senate.gov/general/contact_information/senators_cfm.xml'
 
 
 # Data objects specific to the Senate.
@@ -26,12 +31,9 @@ class Senator(common.Member):
 
 
 # Functions to pull information from senate.gov.
-def get_senators():
+def senators():
     """Get the list of current U.S. Senators."""
-    xml = common.parse_xml()
     xpath = '/contact_information/member'
+    resp = http.get(URL)
+    xml = common.parse_xml(resp)
     return [Senator.from_xml(details) for details in xml.xpath(xpath)]
-
-
-def _fetch_senate_xml():
-    pass

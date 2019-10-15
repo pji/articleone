@@ -33,13 +33,18 @@ Technical Requirements
 The following are the technical requirements for articleone:
 
 1. articleone is a Python module.
-2. articleone will use the aiohttp module for HTTP.
-3. articleone will use descriptors to handle validation.
-4. articleone will normalize all strings to UTF-8, NFC
+2. articleone will use descriptors to handle validation.
+3. articleone will normalize all strings to UTF-8, NFC
 
 
 Design Discussion
 -----------------
+The following are my thoughts as I work through the design. There 
+is no guarantee this is coherent or useful.
+
+
+Data Model
+~~~~~~~~~~
 The first thing to work through is the data model. If I'm going to 
 go get data, I need somewhere to put it. The pattern I'm going to 
 use here is going to be based on the pattern in *Fluent Python*. 
@@ -51,6 +56,9 @@ the following modules:
 * tests/test_common
 * tests/test_senate
 
+
+Connection: Initial Thoughts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Next up is the design for the HTTP client to pull the data. I'm 
 not really calling APIs here. I'm more or less just scraping. So, 
 I probably don't need anything super complex here. I also don't 
@@ -89,3 +97,52 @@ that I'm using aiohttp here. Though, the asynchronicity here isn't
 all that useful since the senate.xml file is just one HTTP call. 
 But I probably want it to be able to go get the House information 
 while it's waiting on the call for senate.xml.
+
+The mainline for this will be senate.get_senators.
+
+
+Connection: Asynchronicity
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+The above plan doesn't really work if this is asynchronous. I 
+can't just call http.fetch and have it get the data. I have 
+to create the event loop, add fetch to the loop, and watch for 
+the event signalling that fetch is complete. And I have to do 
+all that in a way that doesn't block anything.
+
+So, maybe I better start the design from the event loop and 
+build from there. I suppose this means that I really need a 
+mainline here to manage the event loop. And all of this is 
+sounding like a lot of infrastructure for what is, right now 
+at least, two HTTP calls. Maybe this is not the project to 
+play with aiohttp on. So, let's keep it with requests for now.
+
+Asynchronous HTTP call feature is cancelled.
+
+
+Connection: Redesign
+~~~~~~~~~~~~~~~~~~~~
+The pattern with requests is much easier. It doesn't change much 
+from my initial-thoughts design:
+
+1. http.get
+2. senate._get_senate_xml
+3. common.parse_xml
+4. senate.Senator.from_xml
+
+Is 2 really necessary? I'm not sure when I'd ever need to make 
+a call to get senate.xml separate from the call to get all the 
+senator.Senator objects. Also, I can just call the mainline 
+for this senate.senators. Though, may want to look at ways to 
+handle caching for that, making it act more like a property 
+than a function. Maybe.
+
+Anyway, the steps inside senator.senators are:
+
+1. http.get
+2. common.parse_xml
+3. senate.Senator.from_xml
+
+Since the trusted objects are in common and the data going to 
+parse_xml is not trusted, I may want to think about moving it 
+out of common. I have to parse HTML for the House, so having 
+it outside of senate still seems good. Maybe a utility module?

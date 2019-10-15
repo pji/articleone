@@ -143,7 +143,7 @@ class MemberTestCase(unittest.TestCase):
 
 
 class ParseXmlTestCase(unittest.TestCase):
-    def test__validXml(self):
+    def test_validXml(self):
         """common.parse_xml: Given a string containing XML, the 
         function should return an lxml.etree.Element representing 
         the XML in the string.
@@ -162,3 +162,18 @@ class ParseXmlTestCase(unittest.TestCase):
         for a, b in zip(expected, actual):
             self.assertEqual(a.tag, b.tag)
             self.assertEqual(a.text, b.text)
+    
+    def test_invalidXml(self):
+        """common.parse_xml: Given a string containing invalid 
+        XML, the function should raise an exception.
+        """
+        expected = etree.XMLSyntaxError
+        
+        text = ('<book>'
+                '   <spam>foo<spam>'
+                '   <eggs>bar</eggs>'
+                '   <bacon>baz</bacon>'
+                '</book>')
+        
+        with self.assertRaises(expected):
+            actual = com.parse_xml(text)

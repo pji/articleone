@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 from lxml import etree
 
 from articleone import common as com
+from articleone import http
 from articleone import senate as sen
 
 
@@ -82,14 +83,26 @@ class SenatorTestCase(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
-class GetSenatorsTestCase(unittest.TestCase):
-    @patch('articleone.common.parse_xml', new=mock__parse_xml)
-    def test__get_senators__noError(self):
-        """senate.get_senators: The function should return the 
+class SenatorsTestCase(unittest.TestCase):
+    @patch('articleone.http.get')
+    @patch('articleone.common.parse_xml')
+    def test__senators__noError(self, mock__parse_xml, mock__get):
+        """senate.senators: The function should return the 
         list of current U.S. senators as a list of senate.Senator 
         objects.
         """
-        expected = [sen.Senator(*args) for args in senators_args]
-        actual = sen.get_senators()
-        self.assertEqual(expected, actual)
+        expected_1 = [sen.Senator(*args) for args in senators_args]
+        expected_2 = build_senate_xml(senators_args)
+        expected_3 = etree.tostring(expected_2)
+        expected_4 = sen.URL
+        
+        mock__get.return_value = expected_3
+        mock__parse_xml.return_value = expected_2
+        actual = sen.senators()
+        
+        self.assertEqual(expected_1, actual)
+        mock__parse_xml.assert_called_with(expected_3)
+        mock__get.assert_called_with(expected_4)
+        
     
+
