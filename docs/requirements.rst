@@ -146,3 +146,10 @@ Since the trusted objects are in common and the data going to
 parse_xml is not trusted, I may want to think about moving it 
 out of common. I have to parse HTML for the House, so having 
 it outside of senate still seems good. Maybe a utility module?
+
+
+Interface: CLI
+~~~~~~~~~~~~~~
+I could implement the status updates with a coroutine, but I'm 
+not certain why that would be better than a class. So, I think 
+I'll try it with a class this time.
