@@ -24,6 +24,7 @@ def build_us_details(details):
         'terms': [
             {
                 'party': details[2],
+                'type': details[3],
             },
         ],
     }
@@ -39,8 +40,8 @@ class MembersTestCase(unittest.TestCase):
         Congress.
         """
         data = [
-            ['Spam', 'Eggs', 'Democrat',],
-            ['Bacon', 'Baked Beans', 'Independent',],
+            ['Spam', 'Eggs', 'Democrat', 'Senate'],
+            ['Bacon', 'Baked Beans', 'Independent', 'Senate'],
         ]
         us_json = [build_us_details(item) for item in data]
         expected = [com.Member(*args) for args in data]

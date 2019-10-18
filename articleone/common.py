@@ -13,10 +13,24 @@ from articleone import validators as valid
 
 
 # Common configuration.
-PARTIES = ['D', 'I', 'R', 'Democrat', 'Republican', 'Independent']
+PARTIES = ('D', 'I', 'R', 'Democrat', 'Republican', 'Independent')
+CHAMBERS = {
+    'rep': 'House',
+    'sen': 'Senate',
+    'none': None,
+}
 
 
 # Common object validator functions.
+def val_chamber(self, value):
+    if value in CHAMBERS:
+        return CHAMBERS[value]
+    if value in CHAMBERS.values():
+        return value
+    reason = 'could not be normalized'
+    raise ValueError(self.msg.format(reason))
+
+
 def val_party(self, value):
     if value not in PARTIES:
         reason = 'value not in list'
@@ -25,6 +39,9 @@ def val_party(self, value):
 
 
 # Common object validating descriptors.
+ValidChamber = valid.valfactory('ValidChamber', 
+                                 val_chamber, 
+                                 'Invalid chamber ({}).')
 ValidParty = valid.valfactory('ValidParty', val_party, 'Invalid party ({}).')
 
 
@@ -35,12 +52,15 @@ class Member:
     last_name = valid.Text()
     first_name = valid.Text()
     party = ValidParty()
+    chamber = ValidChamber()
     
-    def __init__(self, last_name:str, first_name:str, party:str):
+    def __init__(self, last_name:str, first_name:str, party:str, 
+                 chamber: str = None):
         """Initialize an instance."""
         self.last_name = last_name
         self.first_name = first_name
         self.party = party
+        self.chamber = chamber
     
     def __eq__(self, other):
         """Evaluate equality of two common.Member objects."""
@@ -48,7 +68,8 @@ class Member:
             return NotImplemented
         return (self.last_name == other.last_name 
                 and self.first_name == other.first_name 
-                and self.party == other.party)
+                and self.party == other.party
+                and self.chamber == other.chamber)
     
     def __ne__(self, other):
         """Evaluate non-equality of two common.Member objects."""
@@ -68,6 +89,8 @@ class Member:
             details['name']['first'],
             details['terms'][-1]['party'],
         ]
+        if details['terms'][-1].setdefault('type', None):
+            args.append(details['terms'][-1]['type'],)
         return cls(*args)
 
 

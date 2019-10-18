@@ -37,6 +37,41 @@ def build_test_xml():
 
  
 # Tests.
+class ValChamberTestCase(unittest.TestCase):
+    def test_valid(self):
+        """common.val_chamber: Given a valid value, the function 
+        should return it.
+        """
+        expected = 'Senate'
+        actual = com.val_chamber(None, expected)
+        self.assertEqual(expected, actual)
+    
+    def test_invalid(self):
+        """common.val_chamber: Given an invalid value, the function 
+        should raise a ValueError exception.
+        """
+        expected = ValueError
+        
+        value = 'spam'
+        class Eggs:
+            msg = '{}'
+        obj = Eggs()
+        
+        with self.assertRaises(expected):
+            _ = com.val_chamber(obj, value)
+    
+    def test_normalized(self):
+        """common.val_chamber: Given a common alternative value for 
+        a type, the function should return a normalized value.
+        """
+        expected = ['Senate', 'House']
+        
+        values = ['sen', 'rep']
+        actual = [com.val_chamber(None, value) for value in values]
+        
+        self.assertEqual(expected, actual)
+
+
 class ValPartyTestCase(unittest.TestCase):
     def test__val_party__valid(self):
         """common.val_party: Given a value, if the value is a valid 
@@ -63,6 +98,21 @@ class ValPartyTestCase(unittest.TestCase):
 
 
 class DescriptorsTestCase(unittest.TestCase):
+    def test__ValidChamber(self):
+        """common.ValidChamber: If the given value is a valid type, 
+        the descriptor should assign it to the protected value.
+        """
+        expected = 'Senate'
+        
+        class Spam:
+            chamber = com.ValidChamber()
+        obj = Spam()
+        value = 'sen'
+        obj.chamber = value
+        actual = obj.chamber
+        
+        self.assertEqual(expected, actual)
+
     def test__ValidParty(self):
         """common.ValidParty: If the given value is a valid party 
         identifier, the descriptor should assign it to the protected 
@@ -159,7 +209,7 @@ class MemberTestCase(unittest.TestCase):
         information from the @unitedstates project, the 
         method should return an instance of common.Members.
         """
-        expected = com.Member('Spam', 'Eggs', 'Democrat')
+        expected = com.Member('Spam', 'Eggs', 'Democrat', 'Senate')
         
         data = {
             'name': {
@@ -208,8 +258,6 @@ class BuildMemberMatrix(unittest.TestCase):
         actual = com.build_member_matrix(mem_list)
         
         self.assertEqual(expected, actual)
-        
-        
 
 
 class ParseJsonTestCase(unittest.TestCase):
