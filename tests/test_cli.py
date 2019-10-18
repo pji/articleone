@@ -11,6 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from articleone import cli
+from articleone import common
 
 
 # Utility functions.
@@ -117,10 +118,41 @@ class StatusTestCase(unittest.TestCase):
         self.assertEqual(expected_msg, actual_msg)
 
 
-@unittest.skip
-class SenatorsTestCase(unittest.TestCase):
-    def test_valid(self):
+# @unittest.skip
+class MembersTestCase(unittest.TestCase):
+    @patch('articleone.common.build_member_matrix')
+    @patch('articleone.unitedstates.members')
+    def test_valid(self, mock__members, mock__build_matrix):
         """cli.senators: The function should output a list of 
         U.S. senators.
         """
-        raise NotImplementedError
+        matrix = [
+            [
+                'Last Name',            # Member.last_name
+                'First Name',           # Member.first_name
+                'Party',                # Member.party
+            ],
+            ['Durbin', 'Dick', 'Democrat',],
+            ['Duckworth', 'Tammy', 'Democrat',],
+            ['Sanders', 'Benard', 'Independent',],
+        ]
+        tmp = '{:<20} {:<20} {}\n'
+        lines = ['\n',]
+        lines.append('LIST OF MEMBERS\n')
+        lines.append('---------------\n')
+        for line in [tmp.format(*args) for args in matrix]:
+            lines.append(line)
+        lines.append('---------------\n')
+        lines.append('\n')
+        expected = ''.join(lines)
+        
+        mock__members.return_value = [common.Member(*args) 
+                                      for args in matrix[1:]]
+        mock__build_matrix.return_value = matrix
+        with capture() as (out, err):
+            cli.members()
+        actual = out.getvalue()
+        
+        self.assertEqual(expected, actual)
+
+

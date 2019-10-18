@@ -21,11 +21,8 @@ Functional Requirements
 -----------------------
 The following are the functional requirements for articleone: 
 
-1. articleone can parse the list of current U.S. senators found here:
-   https://www.senate.gov/general/contact_information/senators_cfm.xml
-2. articleone can parse the list of current U.S representatives 
-   found here: 
-   https://www.house.gov/representatives
+1. articleone can return information about U.S. members of 
+   Congress from the @unitedstates project on GitHub
 
 
 Technical Requirements
@@ -152,4 +149,34 @@ Interface: CLI
 ~~~~~~~~~~~~~~
 I could implement the status updates with a coroutine, but I'm 
 not certain why that would be better than a class. So, I think 
-I'll try it with a class this time.
+I'll try it with a class this time. See the specific requirements 
+for the cli.Status object in tests/test_cli.
+
+
+Roadblock: Switching from senate.gov
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Instead of pointing directly to the senate.gov site, I'm switching 
+to using the information provided by the @unitedstates project 
+on GitHub. I could access this data through Propublica's Congress 
+API, but that requires signing up for an API key, which I'd have to 
+keep secret. While I may change my mind in the future, for now I'm 
+just going to go to @unitedstates.
+
+This means a pretty substantial redesign of the connection client 
+modules. The senate module will be removed and replaced with a 
+unitedstates module for connecting to the @unitedstates project. 
+Both Senate and House information will be retrieved from there. 
+That probably means that I won't need separate Senator and 
+Representative objects. The distinction will just be an attribute 
+of the common.Member object.
+
+The initial plan for the contents of unitedstates.py:
+
+* senators
+* representatives
+* members
+
+The functional requirements above will be updated with this change
+
+The URL for the information is:
+https://theunitedstates.io/congress-legislators/legislators-current.json

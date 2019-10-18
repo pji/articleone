@@ -8,13 +8,23 @@ from threading import Thread
 from time import sleep
 import unittest
 
-from requests import get
+from requests import get, Session
 
 from articleone import http
 from tests import stub_http
 
 
 # Tests.
+class BuildSessionTestCase(unittest.TestCase):
+    def test__valid(self):
+        """http.build_session: The function should return an 
+        http.Session object.
+        """
+        expected = Session
+        actual = http.build_session()
+        self.assertTrue(isinstance(actual, expected))
+
+
 class GetTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -74,3 +84,18 @@ class GetTestCase(unittest.TestCase):
         url = f'{self.fqdn}:{self.port}/500'
         with self.assertRaises(expected):
             resp = http.get(url)
+    
+    def test_session(self):
+        """http.get: The function should accept a requests.Session 
+        object used to manage the http session and use it when 
+        sending requests.
+        """
+        expected = 'success'
+        
+        session = Session()
+        url1 = f'{self.fqdn}:{self.port}/cookie_set'
+        url2 = f'{self.fqdn}:{self.port}/cookie_check'
+        _ = http.get(url1, session)
+        actual = http.get(url2, session)
+        
+        self.assertEqual(expected, actual)

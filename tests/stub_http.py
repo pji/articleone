@@ -6,7 +6,7 @@ A stubbed HTTP server for testing articleone.http.
 """
 import logging
 
-from flask import abort, Flask, request
+from flask import abort, Flask, request, make_response
 
 
 # Silence the logger since this is just for test cases.
@@ -27,6 +27,21 @@ def shutdown_server():
 
 
 # Responders.
+@app.route('/cookie_set', methods=['GET',])
+def cookie_set():
+    """Respond to cookie setting test."""
+    resp = make_response('success')
+    resp.set_cookie('spam', 'eggs')
+    return resp
+
+
+@app.route('/cookie_check', methods=['GET',])
+def cookie_check():
+    if request.cookies.get('spam'):
+        return 'success'
+    return 'failed'
+
+
 @app.route('/401', methods=['GET',])
 def error_401():
     """Respond to the 401 error test."""

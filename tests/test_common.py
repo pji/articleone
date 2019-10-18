@@ -6,12 +6,24 @@ This module contains the test for the articleone.common module.
 """
 import unittest
 
+from json import loads
+from json.decoder import JSONDecodeError
+
 from lxml import etree
 
 from articleone import common as com
 
 
 # Test data utilities.
+def build_args_list():
+    """Build a list of arguments for generating members."""
+    return [
+        ['Spam', 'Eggs', 'Democrat',],
+        ['Bacon', 'Baked Beans', 'Democrat',],
+        ['Ham', 'Tomato', 'Independent',],
+    ]
+
+
 def build_test_xml():
     """Build XML for test data."""
     root = etree.Element('book')
@@ -140,6 +152,93 @@ class MemberTestCase(unittest.TestCase):
         actual = mbr.__repr__()
         
         self.assertEqual(expected, actual)
+    
+    # @unittest.skip
+    def test__from_json(self):
+        """common.Member.from_json: Given a dictionary of 
+        information from the @unitedstates project, the 
+        method should return an instance of common.Members.
+        """
+        expected = com.Member('Spam', 'Eggs', 'Democrat')
+        
+        data = {
+            'name': {
+                'first': 'Eggs',
+                'last': 'Spam',
+                'official_full': 'Spam Eggs',
+            },
+            'terms': [
+                {
+                    'type': 'sen',
+                    'start': '1995-01-04',
+                    'end': '2001-01-03',
+                    'state': 'IL',
+                    'class': 1,
+                    'party': 'Democrat',
+                },
+                {
+                    'type': 'sen',
+                    'start': '2001-01-04',
+                    'end': '2007-01-03',
+                    'state': 'IL',
+                    'class': 1,
+                    'party': 'Democrat',
+                },
+            ]
+        }
+        actual = com.Member.from_json(data)
+        
+        self.assertEqual(expected, actual)
+
+
+class BuildMemberMatrix(unittest.TestCase):
+    def test_valid(self):
+        """common.build_member_matrix: Given a list of common.
+        Member objects, return a list of rows suitable for 
+        writing into a report.
+        """
+        expected = [[
+            'Last Name',
+            'First Name',
+            'Party',
+        ],]
+        expected.extend(build_args_list())
+        
+        mem_list = [com.Member(*args) for args in build_args_list()]
+        actual = com.build_member_matrix(mem_list)
+        
+        self.assertEqual(expected, actual)
+        
+        
+
+
+class ParseJsonTestCase(unittest.TestCase):
+    def test_valid(self):
+        """common.parse_json: Given a string containing data 
+        in JSON syntax, the function should return Python 
+        native objects representing that data.
+        """
+        data = ('{'
+                '   "first name": "Spam",'
+                '   "last name": "Eggs",'
+                '   "party": "D"'
+                '}')
+        expected = loads(data)
+        actual = com.parse_json(data)
+        self.assertEqual(expected, actual)
+    
+    def test_invalid(self):
+        """common.parse_json: Given a string containing invalid 
+        JSON, the function should raise an exception.
+        """
+        expected = JSONDecodeError
+        data = ('{'
+                "   'first name': 'Spam',"
+                '   "last name": "Eggs",'
+                '   "party": "D"'
+                '}')
+        with self.assertRaises(expected):
+            _ = com.parse_json(data)
 
 
 class ParseXmlTestCase(unittest.TestCase):

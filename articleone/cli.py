@@ -4,8 +4,12 @@ cli
 
 A module for running articleone's command line interface.
 """
+import argparse
 import sys
 import time
+
+from articleone import common
+from articleone import unitedstates as us
 
 
 # Utility classes.
@@ -53,6 +57,28 @@ class Status:
 
 
 # Command scripts.
-def senators():
+def members():
     """Output a list of U.S. senators."""
-    pass
+    mbr_list = us.members()
+    matrix = common.build_member_matrix(mbr_list)
+    
+    tmp = '{:<20} {:<20} {}'
+    title = 'List of Members'
+    print()
+    print(title.upper())
+    print('-' * len(title))
+    for row in matrix:
+        print(tmp.format(*row))
+    print('-' * len(title))
+    print()
+
+
+# Mainline.
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(description='U.S. legislative branch info.')
+    p.add_argument('-m', '--members', help='Get list of MoCs.', 
+                   action='store_true')
+    args = p.parse_args()
+    
+    if args.members:
+        members()
