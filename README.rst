@@ -2,4 +2,5 @@
 articleone
 ==========
 
-Client to gather information from senate.gov and house.gov.
+Client to gather information on the U.S. Congress from the 
+@unitedstates project on GitHub.
