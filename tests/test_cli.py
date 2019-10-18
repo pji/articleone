@@ -123,8 +123,8 @@ class MembersTestCase(unittest.TestCase):
     @patch('articleone.common.build_member_matrix')
     @patch('articleone.unitedstates.members')
     def test_valid(self, mock__members, mock__build_matrix):
-        """cli.senators: The function should output a list of 
-        U.S. senators.
+        """cli.members: The function should output a list of 
+        the members of the U.S. Congress.
         """
         matrix = [
             [
@@ -156,3 +156,43 @@ class MembersTestCase(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
+class SenatorsTestCase(unittest.TestCase):
+    @patch('articleone.common.build_member_matrix')
+    @patch('articleone.unitedstates.senators')
+    def test_valid(self, mock__senators, mock__build_matrix):
+        """cli.senators: The function should output a list of 
+        the members of the U.S. Senate.
+        """
+        matrix = [
+            [
+                'Last Name',            # Member.last_name
+                'First Name',           # Member.first_name
+                'Party',                # Member.party
+            ],
+            ['Durbin', 'Dick', 'Democrat',],
+            ['Duckworth', 'Tammy', 'Democrat',],
+            ['Sanders', 'Benard', 'Independent',],
+        ]
+        tmp = '{:<20} {:<20} {}\n'
+        lines = ['\n',]
+        lines.append('LIST OF SENATORS\n')
+        lines.append('----------------\n')
+        for line in [tmp.format(*args) for args in matrix]:
+            lines.append(line)
+        lines.append('----------------\n')
+        lines.append('\n')
+        expected = ''.join(lines)
+        
+        args_list = []
+        for args in matrix[1:]:
+            args.append('Senate')
+            args_list.append(args)
+        mock__senators.return_value = [common.Member(*args) 
+                                       for args in args_list[1:]]
+        mock__build_matrix.return_value = matrix
+        with capture() as (out, err):
+            cli.senators()
+        actual = out.getvalue()
+        
+        self.assertEqual(expected, actual)
+        

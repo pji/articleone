@@ -52,4 +52,26 @@ class MembersTestCase(unittest.TestCase):
         
         self.assertEqual(expected, actual)
         mock__parse_json.assert_called_with(json.dumps(us_json))
+
+
+class SenatorsTestCase(unittest.TestCase):
+    @patch('articleone.unitedstates.members')
+    def test_valid(self, mock__members):
+        """unitedstates.senators: The function should return a 
+        list of common.Member objects representing the members 
+        of the U.S. Senate.
+        """
+        args_list = [
+            ['Spam', 'Eggs', 'Democrat', 'Senate',],
+            ['Bacon', 'Baked Beans', 'Independent', 'Senate',],
+            ['Ham', 'Tomato', 'Democrat', 'House',],
+        ]
+        expected = [
+            com.Member(*args_list[0]),
+            com.Member(*args_list[1]),
+        ]
         
+        mock__members.return_value = [com.Member(*args) for args in args_list]
+        actual = us.senators()
+        
+        self.assertEqual(expected, actual)

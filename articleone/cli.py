@@ -56,14 +56,7 @@ class Status:
         self.msg = new_msg
 
 
-# Command scripts.
-def members():
-    """Output a list of U.S. senators."""
-    mbr_list = us.members()
-    matrix = common.build_member_matrix(mbr_list)
-    
-    tmp = '{:<20} {:<20} {}'
-    title = 'List of Members'
+def write_term(title, tmp, matrix):
     print()
     print(title.upper())
     print('-' * len(title))
@@ -73,12 +66,35 @@ def members():
     print()
 
 
+# Command scripts.
+def members():
+    """Output a list of the members of the U.S. Congress."""
+    mbr_list = us.members()
+    matrix = common.build_member_matrix(mbr_list)
+    tmp = '{:<20} {:<20} {}'
+    title = 'List of Members'
+    write_term(title, tmp, matrix)
+
+
+def senators():
+    """Output a list of the members of the U.S. Senate."""
+    mbr_list = us.senators()
+    matrix = common.build_member_matrix(mbr_list)
+    tmp = '{:<20} {:<20} {}'
+    title = 'List of Senators'
+    write_term(title, tmp, matrix)
+
+
 # Mainline.
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description='U.S. legislative branch info.')
     p.add_argument('-m', '--members', help='Get list of MoCs.', 
                    action='store_true')
+    p.add_argument('-s', '--senators', help='Get list of senators.', 
+                   action='store_true')
     args = p.parse_args()
     
     if args.members:
         members()
+    if args.senators:
+        senators()

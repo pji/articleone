@@ -20,3 +20,8 @@ def members():
     resp = http.get(URL)
     details = common.parse_json(resp)
     return [common.Member.from_json(detail) for detail in details]
+
+
+def senators():
+    """Get a list of the members of the U.S. Senate."""
+    return [mbr for mbr in members() if mbr.chamber == 'Senate']
