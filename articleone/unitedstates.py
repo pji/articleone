@@ -22,6 +22,13 @@ def members():
     return [common.Member.from_json(detail) for detail in details]
 
 
+def representatives():
+    """Get a list of the members of the U.S. House of 
+    Representatives.
+    """
+    return [mbr for mbr in members() if mbr.chamber == 'House']
+
+
 def senators():
     """Get a list of the members of the U.S. Senate."""
     return [mbr for mbr in members() if mbr.chamber == 'Senate']

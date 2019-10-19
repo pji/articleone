@@ -76,6 +76,17 @@ def members():
     write_term(title, tmp, matrix)
 
 
+def representatives():
+    """Output a list of the members of the U.S. House of 
+    Representatives.
+    """
+    mbr_list = us.representatives()
+    matrix = common.build_member_matrix(mbr_list)
+    tmp = '{:<20} {:<20} {}'
+    title = 'List of Representatives'
+    write_term(title, tmp, matrix)
+
+
 def senators():
     """Output a list of the members of the U.S. Senate."""
     mbr_list = us.senators()
@@ -90,11 +101,16 @@ if __name__ == '__main__':
     p = argparse.ArgumentParser(description='U.S. legislative branch info.')
     p.add_argument('-m', '--members', help='Get list of MoCs.', 
                    action='store_true')
+    p.add_argument('-r', '--representatives', 
+                   help='Get list of representatives.', 
+                   action='store_true')
     p.add_argument('-s', '--senators', help='Get list of senators.', 
                    action='store_true')
     args = p.parse_args()
     
     if args.members:
         members()
+    if args.representatives:
+        representatives()
     if args.senators:
         senators()

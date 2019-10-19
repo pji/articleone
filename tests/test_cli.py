@@ -118,6 +118,35 @@ class StatusTestCase(unittest.TestCase):
         self.assertEqual(expected_msg, actual_msg)
 
 
+class WriteTermTestCase(unittest.TestCase):
+    def test_valid(self):
+        """cli.write_term: Given a title, string formating template, 
+        and a report matrix, the function will write the report to 
+        the terminal.
+        """
+        matrix = [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]
+        tmp = '{} {} {}\n'
+        lines = ['\n',]
+        lines.append('TITLE\n')
+        lines.append('-----\n')
+        for line in [tmp.format(*args) for args in matrix]:
+            lines.append(line)
+        lines.append('-----\n')
+        lines.append('\n')
+        expected = ''.join(lines)
+        
+        title = 'Title'
+        with capture() as (out, err):
+            cli.write_term(title, tmp[:-1], matrix)
+        actual = out.getvalue()
+        
+        self.assertEqual(expected, actual)
+
+
 # @unittest.skip
 class MembersTestCase(unittest.TestCase):
     @patch('articleone.common.build_member_matrix')
@@ -151,6 +180,47 @@ class MembersTestCase(unittest.TestCase):
         mock__build_matrix.return_value = matrix
         with capture() as (out, err):
             cli.members()
+        actual = out.getvalue()
+        
+        self.assertEqual(expected, actual)
+
+
+class RepresentativeTestCase(unittest.TestCase):
+    @patch('articleone.common.build_member_matrix')
+    @patch('articleone.unitedstates.representatives')
+    def test_valid(self, mock__representatives, mock__build_matrix):
+        """cli.senators: The function should output a list of 
+        the members of the U.S. Senate.
+        """
+        matrix = [
+            [
+                'Last Name',            # Member.last_name
+                'First Name',           # Member.first_name
+                'Party',                # Member.party
+            ],
+            ['Durbin', 'Dick', 'Democrat',],
+            ['Duckworth', 'Tammy', 'Democrat',],
+            ['Sanders', 'Benard', 'Independent',],
+        ]
+        tmp = '{:<20} {:<20} {}\n'
+        lines = ['\n',]
+        lines.append('LIST OF REPRESENTATIVES\n')
+        lines.append('-----------------------\n')
+        for line in [tmp.format(*args) for args in matrix]:
+            lines.append(line)
+        lines.append('-----------------------\n')
+        lines.append('\n')
+        expected = ''.join(lines)
+        
+        args_list = []
+        for args in matrix[1:]:
+            args.append('House')
+            args_list.append(args)
+        mock__representatives.return_value = [common.Member(*args) 
+                                              for args in args_list[1:]]
+        mock__build_matrix.return_value = matrix
+        with capture() as (out, err):
+            cli.representatives()
         actual = out.getvalue()
         
         self.assertEqual(expected, actual)
