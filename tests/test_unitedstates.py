@@ -306,23 +306,30 @@ class MembersTestCase(unittest.TestCase):
 
 
 class RepresentativesTestCase(unittest.TestCase):
-    @patch('articleone.unitedstates.members')
-    def test_valid(self, mock__members):
+    @patch('articleone.unitedstates._get_members_details')
+    def test_valid(self, mock__gmd):
         """unitedstates.representatives: The function should 
         return a list of common.Member objects representing the 
         members of the U.S. House of Representatives.
         """
         args_list = [
-            ['Spam', 'Eggs', 'Democrat', 'Senate',],
-            ['Bacon', 'Baked Beans', 'Independent', 'House',],
-            ['Ham', 'Tomato', 'Democrat', 'House',],
+            ['Spam', 'Eggs', 'Democrat', 'Senate', 'IL',],
+            ['Bacon', 'Baked Beans', 'Independent', 'rep', 'IL',
+             3, 'http://bakedbeans.house.gov', '309-555-5555',],
+            ['Ham', 'Tomato', 'Democrat', 'rep', 'IL', 
+             4, 'http://ham.house.gov', '309-555-5555',],
+        ]
+        details = [
+            build_us_details(args_list[0]),
+            build_rep_details(args_list[1]), 
+            build_rep_details(args_list[2]),
         ]
         expected = [
-            com.Member(*args_list[1]),
-            com.Member(*args_list[2]),
+            us.Representative(details[1]),
+            us.Representative(details[2]),
         ]
         
-        mock__members.return_value = [com.Member(*args) for args in args_list]
+        mock__gmd.return_value = details
         actual = us.representatives()
         
         self.assertEqual(expected, actual)

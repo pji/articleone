@@ -115,7 +115,9 @@ def representatives():
     """Get a list of the members of the U.S. House of 
     Representatives.
     """
-    return [mbr for mbr in members() if mbr.chamber == 'House']
+    details = _get_members_details()
+    return [Representative(detail) for detail in details 
+            if detail['terms'][-1]['type'] == 'rep']
 
 
 def senators():
