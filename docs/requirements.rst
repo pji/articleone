@@ -180,3 +180,62 @@ The functional requirements above will be updated with this change
 
 The URL for the information is:
 https://theunitedstates.io/congress-legislators/legislators-current.json
+
+
+Senators v. Representatives
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The above plan worked. However, it leaves me with a problem. Both 
+Senate and House terms have some attributes in common:
+
+* Type
+* Start
+* End
+* State
+* Party
+* Phone
+* Url
+* Rss Url
+* Address
+* Office
+* Fax (Optional.)
+
+But others are different.
+
+Senate:
+* Class
+* State Rank
+* Contact Form
+
+House:
+* District
+
+That brings up a question about modeling their data. Are they senators 
+and representatives? Or, are they people who are serving a term in 
+either the Senate or the House of Representatives? Reality says the 
+later. The data model of @unitedstates says the later. So, I should 
+probably remove the party and chamber information from the Member 
+class, create a Term class, give it Senate and House subclasses, and 
+put the data there. Maybe?
+
+I think this boils down to whether I want the Member objects to be 
+more complicated to create or more complicated to get data from. If 
+I use Term objects, then the process for creating the Members will 
+be:
+
+1. Pull data from @unitedstates
+2. Send each item in the data to Member.from_json()
+3. In from_json, send the current term information to a Term 
+   factory
+4. In from_json, put the result of the Term factory into a term 
+   attribute of the Member
+
+Maybe if I use the factory, then creating the Senators or Represent-
+atives won't be that complicated:
+
+1. Pull data from @unitedstates
+2. Send each item in the data to common.mbrfactory()
+3. mbrfactory looks at the current term and decides whether to 
+   create a Senator or Representative object
+4. mbrfactory returns the Member subclass object
+
+OK, subclasses of common.Member it is.

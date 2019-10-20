@@ -13,6 +13,15 @@ from articleone import unitedstates as us
 
 
 # Test data utilities.
+def build_senator_details(details):
+    """Build the test data for a senator."""
+    data = build_us_details(details)
+    data['terms'][-1]['state_rank'] = details[5]
+    data['terms'][-1]['class'] = details[6]
+    data['terms'][-1]['url'] = details[7]
+    return data
+
+
 def build_us_details(details):
     """Build test data for a member of Congress."""
     return {
@@ -25,12 +34,138 @@ def build_us_details(details):
             {
                 'party': details[2],
                 'type': details[3],
+                'state': details[4],
             },
         ],
     }
 
 
 # Tests.
+class ValClassTestCase(unittest.TestCase):
+    def test_valid(self):
+        """unitedstates.val_class: Given a valid Senate class, the 
+        function should return the value.
+        """
+        expected = 2
+        actual = us.val_class(None, expected)
+        self.assertEqual(expected, actual)
+    
+    def test_invalid(self):
+        """unitedstates.val_class: Given an invalid Senate class, the 
+        function should raise a ValueError exception.
+        """
+        expected = ValueError
+        class Spam:
+            msg = '{}'
+        value = 5
+        
+        with self.assertRaises(expected):
+            _ = us.val_class(Spam(), value)
+    
+    def test_validStr(self):
+        """unitedstates.val_class: Given a valid Senate class as a 
+        string, normalize the value to an integer and return it.
+        """
+        expected_cls = int
+        expected_val = 2
+        value = str(expected_val)
+        actual = us.val_class(None, value)
+        self.assertTrue(isinstance(actual, expected_cls))
+        self.assertEqual(expected_val, actual)
+
+
+class ValRankTestCase(unittest.TestCase):
+    def test__valid(self):
+        """unitedstates.val_rank: Given a valid state rank for a 
+        senator, the function should return it.
+        """
+        expected = 'junior'
+        actual = us.val_rank(None, expected)
+        self.assertEqual(expected, actual)
+    
+    def test__invalid(self):
+        """unitedstates.val_rank: Given an invalid state rank for 
+        a senator, the function should raise a ValueError exception.
+        """
+        expected = ValueError
+        class Spam:
+            msg = '{}'
+        value = 1
+        with self.assertRaises(expected):
+            _ = us.val_rank(Spam(), value)
+
+
+class DescriptorsTestCase(unittest.TestCase):
+    def test__ValidClass(self):
+        """unitedstates.ValidClass: If given a valid Senate class, 
+        the descriptor should set it as the protected value.
+        """
+        expected = 2
+        
+        class Spam:
+            senate_class = us.ValidClass()
+        obj = Spam()
+        obj.senate_class = expected
+        actual = obj.senate_class
+        
+        self.assertEqual(expected, actual)
+
+    def test__ValidRank(self):
+        """unitedstates.ValidRank: If given a valid senator's state 
+        rank, the descriptor should set it as the protected value.
+        """
+        expected = 'senior'
+        
+        class Spam:
+            rank = us.ValidRank()
+        obj = Spam()
+        obj.rank = expected
+        actual = obj.rank
+        
+        self.assertEqual(expected, actual)
+    
+
+class SenatorTestCase(unittest.TestCase):
+    def test__subclass(self):
+        """common.Senator: The class should be a subclass of 
+        common.Member.
+        """
+        expected = com.Member
+        actual = us.Senator
+        self.assertTrue(issubclass(actual, expected))
+    
+    def test__init(self):
+        """common.Senator.__init__: The class should populate 
+        its attributes as expected when instantiated.
+        """
+        expected = [
+            'Spam',
+            'Eggs',
+            'Democrat',
+            'Senate',
+            'IL',
+            'junior',
+            2,
+            'https://test.local/index.html',
+        ]
+        
+        data = build_senator_details(expected)
+        sen = us.Senator(data)
+        actual = [
+            sen.last_name,
+            sen.first_name,
+            sen.party,
+            sen.chamber,
+            sen.state,
+            sen.rank,
+            sen.senate_class,
+            sen.url,
+        ]
+        
+        self.assertEqual(expected, actual)
+
+
+# @unittest.skip
 class MembersTestCase(unittest.TestCase):
     @patch('articleone.common.parse_json')
     @patch('articleone.http.get')
@@ -40,8 +175,8 @@ class MembersTestCase(unittest.TestCase):
         Congress.
         """
         data = [
-            ['Spam', 'Eggs', 'Democrat', 'Senate'],
-            ['Bacon', 'Baked Beans', 'Independent', 'Senate'],
+            ['Spam', 'Eggs', 'Democrat', 'Senate', 'IL',],
+            ['Bacon', 'Baked Beans', 'Independent', 'Senate', 'IL',],
         ]
         us_json = [build_us_details(item) for item in data]
         expected = [com.Member(*args) for args in data]

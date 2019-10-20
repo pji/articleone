@@ -97,6 +97,27 @@ class ValPartyTestCase(unittest.TestCase):
             actual = com.val_party(obj, value)
 
 
+class ValStateTestCase(unittest.TestCase):
+    def test__valid(self):
+        """common.val_state: Given a valid state abbreviation, 
+        the function should return that value.
+        """
+        expected = 'IL'
+        actual = com.val_state(None, expected)
+        self.assertEqual(expected, actual)
+    
+    def test__invalid(self):
+        """common.val_states: Given and invalid state abbreviation, 
+        the function should raise a ValueError exceptions.
+        """
+        expected = ValueError
+        value = 'spam'
+        class Eggs:
+            msg = '{}'
+        with self.assertRaises(expected):
+            _ = com.val_state(Eggs(), value)
+
+
 class DescriptorsTestCase(unittest.TestCase):
     def test__ValidChamber(self):
         """common.ValidChamber: If the given value is a valid type, 
@@ -128,6 +149,21 @@ class DescriptorsTestCase(unittest.TestCase):
         actual = obj.party
         
         self.assertEqual(expected, actual)
+    
+    def test__ValidState(self):
+        """common.ValidState: If the given value is a valid state 
+        postal abbreviation, the descriptor should assign it to 
+        the protected value.
+        """
+        expected = 'IL'
+        
+        class Spam:
+            state = com.ValidState()
+        obj = Spam()
+        obj.state = expected
+        actual = obj.state
+        
+        self.assertEqual(expected, actual)
 
 
 class MemberTestCase(unittest.TestCase):
@@ -135,10 +171,16 @@ class MemberTestCase(unittest.TestCase):
         """common.Member.__init__: The attributes of the class 
         should be populated with the given values when initialized. 
         """
-        expected = ['Spam', 'Eggs', 'D']
+        expected = ['Spam', 'Eggs', 'D', 'Senate', 'IL']
         
         obj = com.Member(*expected)
-        actual = [obj.last_name, obj.first_name, obj.party]
+        actual = [
+            obj.last_name, 
+            obj.first_name, 
+            obj.party, 
+            obj.chamber, 
+            obj.state,
+        ]
         
         self.assertEqual(expected, actual)
     
@@ -147,8 +189,8 @@ class MemberTestCase(unittest.TestCase):
         when comparing two common.Member objects with the same 
         attribute values.
         """
-        obj1 = com.Member('Spam', 'Eggs', 'D')
-        obj2 = com.Member('Spam', 'Eggs', 'D')
+        obj1 = com.Member('Spam', 'Eggs', 'D', 'Senate', 'IL')
+        obj2 = com.Member('Spam', 'Eggs', 'D', 'Senate', 'IL')
         self.assertTrue(obj1 == obj2)
     
     def test__eq__notEqual(self):
@@ -165,6 +207,8 @@ class MemberTestCase(unittest.TestCase):
             com.Member('Tomato', 'Eggs', 'I'),
             com.Member('Dick', 'Durbin', 'D'),
             com.Member('Bernie', 'Sanders', 'I'),
+            com.Member('Spam', 'Eggs', 'D', 'House'),
+            com.Member('Spam', 'Eggs', 'D', None, 'IL'),
         ]
         for other in others:
             self.assertFalse(obj == other)
@@ -196,9 +240,9 @@ class MemberTestCase(unittest.TestCase):
         string representation of the object suitable for 
         troubleshooting.
         """
-        expected = "Member('Spam', 'Eggs', 'D')"
+        expected = "Member('Spam', 'Eggs', 'D', 'House', 'IL')"
         
-        mbr = com.Member('Spam', 'Eggs', 'D')
+        mbr = com.Member('Spam', 'Eggs', 'D', 'House', 'IL')
         actual = mbr.__repr__()
         
         self.assertEqual(expected, actual)
@@ -209,7 +253,7 @@ class MemberTestCase(unittest.TestCase):
         information from the @unitedstates project, the 
         method should return an instance of common.Members.
         """
-        expected = com.Member('Spam', 'Eggs', 'Democrat', 'Senate')
+        expected = com.Member('Spam', 'Eggs', 'Democrat', 'Senate', 'IL')
         
         data = {
             'name': {

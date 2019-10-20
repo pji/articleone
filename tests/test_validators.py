@@ -65,6 +65,52 @@ class ValTextTestCase(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
+class ValHttpUrlTestCase(unittest.TestCase):
+    def test_valid(self):
+        """validators.val_http_url: Given a value, if the value is a 
+        valid URL the function should return it.
+        """
+        expected = 'https://test.local:5000/test/path?key=value#frag'
+        actual = v.val_http_url(None, expected)
+        self.assertEqual(expected, actual)
+    
+    def test_invalidScheme(self):
+        """validators.val_http_url: Given a value, if the value is 
+        not a valid HTTP or HTTPS URL the function should raise a 
+        ValueError exception.
+        """
+        expected = ValueError
+        class Spam:
+            msg = '{}'
+        value = 'ftp://test.local'
+        with self.assertRaises(expected):
+            _ = v.val_http_url(Spam(), value)
+    
+    def test_normalizedConstruction(self):
+        """validators.val_http_url: Given a value, if the value 
+        contains any of the following the function should remove 
+        them:
+        
+        * A parameter part delimiter with an empty parameter part 
+        * A query part delimiter with an empty query part
+        * A fragment part delimiter with an empty fragment part
+        """
+        expected = 'http://test.local/path'
+        value = 'http://test.local/path;?#'
+        actual = v.val_http_url(None, value)
+        self.assertEqual(expected, actual)
+    
+    def test_normalizedEncoding(self):
+        """validators.val_http_urlL Given a value, if the value 
+        contains non-ASCII characters, the function should replace 
+        them with their percent encoded value.
+        """
+        expected = 'http://t%C3%A9st.local/file%20path'
+        value = 'http://tést.local/file%20path'
+        actual = v.val_http_url(None, value)
+        self.assertEqual(expected, actual)
+
+
 class ValWhitelist(unittest.TestCase):
     def test__val_whitelist__valid(self):
         """validators.val_whitelist: Given a whitelist and a 
@@ -97,6 +143,21 @@ class ValWhitelist(unittest.TestCase):
 
 
 class DescriptorsTestCase(unittest.TestCase):
+    def test_HttpUrl(self):
+        """validators.Url: The descriptor should validate and 
+        normalize the given HTTP URL, and, if valid, assign it 
+        to the protected attribute.
+        """
+        expected = 'http://test.local'
+        
+        class Spam:
+            url = v.HttpUrl()
+        obj = Spam()
+        obj.url = expected
+        actual = obj.url
+        
+        self.assertEqual(expected, actual)
+
     def test_Text(self):
         """validators.Text: The descriptor should normalize the 
         given value to a string and, if valid, assign it to the 
@@ -110,4 +171,5 @@ class DescriptorsTestCase(unittest.TestCase):
         obj.attr = expected
         actual = obj.attr
         
-        self.assertEqual(expected, actual) 
+        self.assertEqual(expected, actual)
+    

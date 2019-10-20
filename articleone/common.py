@@ -19,6 +19,12 @@ CHAMBERS = {
     'sen': 'Senate',
     'none': None,
 }
+STATES = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 
+          'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 
+          'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 
+          'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 
+          'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 
+          None,)
 
 
 # Common object validator functions.
@@ -38,11 +44,18 @@ def val_party(self, value):
     return value
 
 
+def val_state(self, value):
+    if value not in STATES:
+        reason = 'not a valid state postal abbreviation'
+        raise ValueError(self.msg.format(reason))
+    return value
+
+
 # Common object validating descriptors.
-ValidChamber = valid.valfactory('ValidChamber', 
-                                 val_chamber, 
+ValidChamber = valid.valfactory('ValidChamber', val_chamber, 
                                  'Invalid chamber ({}).')
 ValidParty = valid.valfactory('ValidParty', val_party, 'Invalid party ({}).')
+ValidState = valid.valfactory('ValidState', val_state, 'Invalid state ({}).')
 
 
 # Common objects.
@@ -53,14 +66,16 @@ class Member:
     first_name = valid.Text()
     party = ValidParty()
     chamber = ValidChamber()
+    state = ValidState()
     
     def __init__(self, last_name:str, first_name:str, party:str, 
-                 chamber: str = None):
+                 chamber: str = None, state: str = None):
         """Initialize an instance."""
         self.last_name = last_name
         self.first_name = first_name
         self.party = party
         self.chamber = chamber
+        self.state = state
     
     def __eq__(self, other):
         """Evaluate equality of two common.Member objects."""
@@ -69,7 +84,8 @@ class Member:
         return (self.last_name == other.last_name 
                 and self.first_name == other.first_name 
                 and self.party == other.party
-                and self.chamber == other.chamber)
+                and self.chamber == other.chamber
+                and self.state == other.state)
     
     def __ne__(self, other):
         """Evaluate non-equality of two common.Member objects."""
@@ -79,7 +95,7 @@ class Member:
         """Provide a string representation for troubleshooting."""
         name = self.__class__.__name__
         return (f'{name}({self.last_name!r}, {self.first_name!r}, '
-                f'{self.party!r})')
+                f'{self.party!r}, {self.chamber!r}, {self.state!r})')
     
     @classmethod
     def from_json(cls, details):
@@ -91,6 +107,8 @@ class Member:
         ]
         if details['terms'][-1].setdefault('type', None):
             args.append(details['terms'][-1]['type'],)
+        if details['terms'][-1].setdefault('state', None):
+            args.append(details['terms'][-1]['state'],)
         return cls(*args)
 
 
