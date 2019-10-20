@@ -367,6 +367,43 @@ class SenatorsTestCase(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
+# Matrix building functions.
+class BuildSenMatrixTestCase(unittest.TestCase):
+    def test_valid(self):
+        """unitedstates.build_sen_matrix: Given a list of 
+        unitedstates.Senator objects, return a list of rows 
+        suitable for a report on the Senator orbjects.
+        """
+        args_list = [
+            ['Spam', 'Eggs', 'Democrat', 'sen', 'IL',
+             'senior', 3, 'http://eggs.senate.gov', 
+             '309-555-5555',],
+            ['Bacon', 'Baked Beans', 'Independent', 'sen', 'IL', 
+             'junior', 1, 'http://bakedbeans.senate.gov', 
+             '309-555-5555',],
+        ]
+        expected = [[
+            'Name',                 # sen.last_name, sen.first_name
+            'State',                # sen.state
+            'Rank',                 # sen.rank
+            'Party',                # sen.party
+        ],]
+        for args in args_list:
+            row = [
+                ', '.join((args[0], args[1])),
+                args[4],
+                args[5],
+                args[2],
+            ]
+            expected.append(row)
+        
+        details = [build_senator_details(args) for args in args_list]
+        sen_list = [us.Senator(detail) for detail in details]
+        actual = us.build_sen_matrix(sen_list)
+        
+        self.assertEqual(expected, actual)
+
+
 # Internal function tests.
 class GetMembersDetailsTestCase(unittest.TestCase):
     @patch('articleone.common.parse_json')

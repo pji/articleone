@@ -127,6 +127,27 @@ def senators():
             if detail['terms'][-1]['type'] == 'sen']
 
 
+# Matrix building functions.
+def build_sen_matrix(sen_list):
+    """Return a matrix of information on the given Senator objects."""
+    headers = [
+        'Name',                 # sen.last_name, sen.first_name
+        'State',                # sen.state
+        'Rank',                 # sen.rank
+        'Party',                # sen.party
+    ]
+    rows = [headers,]
+    for sen in sen_list:
+        row = [
+            ', '.join((sen.last_name, sen.first_name)),
+            sen.state,
+            sen.rank,
+            sen.party,
+        ]
+        rows.append(row)
+    return rows
+
+
 # Internal functions.
 def _get_members_details():
     resp = http.get(URL)
