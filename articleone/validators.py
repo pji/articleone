@@ -5,6 +5,7 @@ validators
 This module contains the general validators for the articleone 
 module.
 """
+from re import match, sub
 import unicodedata as ucd
 import urllib.parse as up
 
@@ -48,6 +49,19 @@ def val_http_url(self, value, charset='utf_8', form='NFC'):
     return normal
 
 
+def val_phone_number(self, value, charset='utf_8', form='NFC'):
+    """Is it a valid North American Numbering Plan phone number?"""
+    value = val_text(self, value, charset, form)
+    pattern = r'^[0-9]{3}-[0-9]{3}-[0-9]{4}$'
+    if not match(pattern, value):
+        value = sub(r'^[(]([0-9]{3})[)]', r'\1-', value)
+        value = sub(r'^([0-9]{3})([0-9]{3})([0-9]{4})$', r'\1-\2-\3', value)
+        if not match(pattern, value):
+            reason = 'not a valid phone number'
+            raise ValueError(self.msg.format(reason))
+    return value
+
+
 def val_whitelist(self, value, whitelist):
     """Validate the value is whitelisted."""
     if value not in whitelist:
@@ -57,5 +71,6 @@ def val_whitelist(self, value, whitelist):
 
 
 # Validating descriptors.
-HttpUrl = valfactory('HttpUrl', val_http_url, 'Invalid HTTP URL ({})')
-Text = valfactory('Text', val_text, 'Invalid text ({})')
+HttpUrl = valfactory('HttpUrl', val_http_url, 'Invalid HTTP URL ({}).')
+Phone = valfactory('Phone', val_phone_number, 'Invalid Phone Number {()}.')
+Text = valfactory('Text', val_text, 'Invalid text ({}).')

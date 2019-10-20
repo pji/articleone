@@ -10,6 +10,12 @@ from articleone import model
 from articleone import validators as v
 
 
+# Utility functions and classes.
+class Descr:
+    msg = '{}'
+
+
+# Validator function test cases.
 class ValTextTestCase(unittest.TestCase):
     def test__val_text__valid(self):
         """validators.val_text: If the given value is a valid string, 
@@ -111,6 +117,57 @@ class ValHttpUrlTestCase(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
+class ValPhoneNumberTestCase(unittest.TestCase):
+    def test_valid(self):
+        """validators.val_phone_number: Given a value, if the 
+        value is a valid North American Numbering Plan phone 
+        number, the function should return it.
+        """
+        expected = '309-555-5555'
+        actual = v.val_phone_number(Descr(), expected)
+        self.assertEqual(expected, actual)
+    
+    def test_normalizeParens(self):
+        """validators.val_phone_number: Given a value, if the 
+        value contains an area code delimited by parentheses, 
+        replace the delimiters with a hyphen.
+        """
+        expected = '309-555-5555'
+        value = '(309)555-5555'
+        actual = v.val_phone_number(Descr(), value)
+        self.assertEqual(expected, actual)
+    
+    def test_normalNoDelim(self):
+        """validators.val_phone_number: Given a value, if the 
+        value is not hyphen delimited, the function should add 
+        the hyphen delimiters and return the value.
+        """
+        expected = '309-555-5555'
+        value = '3095555555'
+        actual = v.val_phone_number(Descr(), value)
+        self.assertEqual(expected, actual)
+    
+    def test_normalStr(self):
+        """validators.val_phone_number: Given a value, if the 
+        value is not a string, the function should coerce it 
+        to a string.
+        """
+        expected = '309-555-5555'
+        value = 3095555555
+        actual = v.val_phone_number(Descr(), value)
+        self.assertEqual(expected, actual)
+    
+    def test_invalid(self):
+        """validators.val_phone_number: Given a value, if the 
+        value is not a valid North American Numbering Plan phone 
+        number, the function should raise a ValueError exception.
+        """
+        expected = ValueError
+        value = 'spam'
+        with self.assertRaises(expected):
+            _ = v.val_phone_number(Descr(), value)
+
+
 class ValWhitelist(unittest.TestCase):
     def test__val_whitelist__valid(self):
         """validators.val_whitelist: Given a whitelist and a 
@@ -142,9 +199,10 @@ class ValWhitelist(unittest.TestCase):
             actual = v.val_whitelist(obj, value, whitelist)
 
 
+# Validating descriptors test cases.
 class DescriptorsTestCase(unittest.TestCase):
     def test_HttpUrl(self):
-        """validators.Url: The descriptor should validate and 
+        """validators.HttpUrl: The descriptor should validate and 
         normalize the given HTTP URL, and, if valid, assign it 
         to the protected attribute.
         """
@@ -158,6 +216,22 @@ class DescriptorsTestCase(unittest.TestCase):
         
         self.assertEqual(expected, actual)
 
+    def test_Phone(self):
+        """validators.Phone: Given a valid value, the descriptor 
+        should normalize it and assign it to the protected 
+        attribute.
+        """
+        expected = '309-555-5555'
+        
+        class Eggs:
+            attr = v.Phone()
+        obj = Eggs()
+        obj.attr = expected
+        actual = obj.attr
+        
+        self.assertEqual(expected, actual)
+    
+    
     def test_Text(self):
         """validators.Text: The descriptor should normalize the 
         given value to a string and, if valid, assign it to the 

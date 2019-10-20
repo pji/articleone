@@ -13,12 +13,22 @@ from articleone import unitedstates as us
 
 
 # Test data utilities.
+def build_rep_details(details):
+    """Build the test data for a representative."""
+    data = build_us_details(details)
+    data['terms'][-1]['district'] = details[5]
+    data['terms'][-1]['url'] = details[6]
+    data['terms'][-1]['phone'] = details[7]
+    return data
+
+
 def build_senator_details(details):
     """Build the test data for a senator."""
     data = build_us_details(details)
     data['terms'][-1]['state_rank'] = details[5]
     data['terms'][-1]['class'] = details[6]
     data['terms'][-1]['url'] = details[7]
+    data['terms'][-1]['phone'] = details[8]
     return data
 
 
@@ -40,7 +50,12 @@ def build_us_details(details):
     }
 
 
-# Tests.
+class Descr:
+    """A stub class for validator tests."""
+    msg = '{}'
+
+
+# Validator tests.
 class ValClassTestCase(unittest.TestCase):
     def test_valid(self):
         """unitedstates.val_class: Given a valid Senate class, the 
@@ -72,6 +87,46 @@ class ValClassTestCase(unittest.TestCase):
         actual = us.val_class(None, value)
         self.assertTrue(isinstance(actual, expected_cls))
         self.assertEqual(expected_val, actual)
+
+
+class ValDistrictTestCase(unittest.TestCase):
+    def test_valid(self):
+        """unitedstates.val_district: Given a value, if the value 
+        is valid, return it.
+        """
+        expected = 10
+        actual = us.val_district(Descr(), expected)
+        self.assertEqual(expected, actual)
+    
+    def test_invalidMin(self):
+        """unitedstates.val_district: Given a value, if the value 
+        is below the minimum district number, the function should 
+        raise a ValueError exception.
+        """
+        expected = ValueError
+        value = -1
+        with self.assertRaises(expected):
+            _ = us.val_district(Descr(), value)
+    
+    def test_invalidMax(self):
+        """unitedstates.val_district: Given a value, if the value 
+        is above the maximum district number, the function should 
+        raise a ValueError exception.
+        """
+        expected = ValueError
+        value = 54
+        with self.assertRaises(expected):
+            _ = us.val_district(Descr(), value)
+    
+    def test_normalizeStr(self):
+        """unitedstates.val_district: Given a value, if the value 
+        cannot be coerced to a integer, it is invalid, and the 
+        function should return a TypeError exception.
+        """
+        expected = TypeError
+        value = 'two'
+        with self.assertRaises(expected):
+            _ = us.val_district(Descr(), value)
 
 
 class ValRankTestCase(unittest.TestCase):
@@ -110,6 +165,23 @@ class DescriptorsTestCase(unittest.TestCase):
         
         self.assertEqual(expected, actual)
 
+    def test__ValidDistrict(self):
+        """unitedstates.ValidDistrict: Given a value, if the value 
+        is a valid possible House of Representatives district, the 
+        descriptor should set it as the value of the protected 
+        attribute.
+        """
+        expected = 4
+        
+        class Spam:
+            district = us.ValidDistrict()
+        obj = Spam()
+        obj.district = expected
+        actual = obj.district
+        
+        self.assertEqual(expected, actual)
+    
+    
     def test__ValidRank(self):
         """unitedstates.ValidRank: If given a valid senator's state 
         rank, the descriptor should set it as the protected value.
@@ -124,6 +196,48 @@ class DescriptorsTestCase(unittest.TestCase):
         
         self.assertEqual(expected, actual)
     
+
+# Trusted object tests.
+class RepresentativeTestCase(unittest.TestCase):
+    def test__subclass(self):
+        """unitedstates.Representative: The class should be a 
+        subclass of common.Member.
+        """
+        expected = com.Member
+        actual = us.Representative
+        self.assertTrue(issubclass(actual, expected))
+    
+    def test__init(self):
+        """unitedstates.Representative: Given a dictionary of 
+        details, the class should populate its attributes as 
+        expected when instantiated.
+        """
+        expected = [
+            'Eggs', 
+            'Spam', 
+            'Democrat',
+            'House',
+            'IL',
+            13,
+            'http://eggs.house.gov',
+            '309-555-5555',
+        ]
+        
+        details = build_rep_details(expected)
+        rep = us.Representative(details)
+        actual = [
+            rep.last_name,
+            rep.first_name,
+            rep.party,
+            rep.chamber,
+            rep.state,
+            rep.district,
+            rep.url,
+            rep.phone,
+        ]
+        
+        self.assertEqual(expected, actual)
+
 
 class SenatorTestCase(unittest.TestCase):
     def test__subclass(self):
@@ -147,6 +261,7 @@ class SenatorTestCase(unittest.TestCase):
             'junior',
             2,
             'https://test.local/index.html',
+            '309-555-5555',
         ]
         
         data = build_senator_details(expected)
@@ -160,33 +275,13 @@ class SenatorTestCase(unittest.TestCase):
             sen.rank,
             sen.senate_class,
             sen.url,
+            sen.phone,
         ]
         
         self.assertEqual(expected, actual)
 
 
-# @unittest.skip
-class GetMembersDetailsTestCase(unittest.TestCase):
-    @patch('articleone.common.parse_json')
-    @patch('articleone.http.get')
-    def test_valid(self, mock__get, mock__parse_json):
-        """unitedstates._get_members_details: The function should 
-        return a list of dictionaries representing the members of 
-        the U.S. Congress.
-        """
-        data = [
-            ['Spam', 'Eggs', 'Democrat', 'Senate', 'IL',],
-            ['Bacon', 'Baked Beans', 'Independent', 'Senate', 'IL',],
-        ]
-        expected = [build_us_details(item) for item in data]
-        
-        mock__get.return_value = json.dumps(expected)
-        mock__parse_json.return_value = expected
-        actual = us._get_members_details()
-        
-        self.assertEqual(expected, actual)
-
-
+# Data gathering function tests.
 class MembersTestCase(unittest.TestCase):
     @patch('articleone.common.parse_json')
     @patch('articleone.http.get')
@@ -242,9 +337,11 @@ class SenatorsTestCase(unittest.TestCase):
         """
         args_list = [
             ['Spam', 'Eggs', 'Democrat', 'sen', 'IL',
-             'senior', 3, 'http://eggs.senate.gov', ],
+             'senior', 3, 'http://eggs.senate.gov', 
+             '309-555-5555',],
             ['Bacon', 'Baked Beans', 'Independent', 'sen', 'IL', 
-             'junior', 1, 'http://bakedbeans.senate.gov', ],
+             'junior', 1, 'http://bakedbeans.senate.gov', 
+             '309-555-5555',],
             ['Ham', 'Tomato', 'Democrat', 'rep', 'IN',],
         ]
         details = [
@@ -259,6 +356,28 @@ class SenatorsTestCase(unittest.TestCase):
         
         mock__gmd.return_value = details
         actual = us.senators()
+        
+        self.assertEqual(expected, actual)
+
+
+# Internal function tests.
+class GetMembersDetailsTestCase(unittest.TestCase):
+    @patch('articleone.common.parse_json')
+    @patch('articleone.http.get')
+    def test_valid(self, mock__get, mock__parse_json):
+        """unitedstates._get_members_details: The function should 
+        return a list of dictionaries representing the members of 
+        the U.S. Congress.
+        """
+        data = [
+            ['Spam', 'Eggs', 'Democrat', 'Senate', 'IL',],
+            ['Bacon', 'Baked Beans', 'Independent', 'Senate', 'IL',],
+        ]
+        expected = [build_us_details(item) for item in data]
+        
+        mock__get.return_value = json.dumps(expected)
+        mock__parse_json.return_value = expected
+        actual = us._get_members_details()
         
         self.assertEqual(expected, actual)
 
