@@ -89,9 +89,9 @@ def representatives():
 
 def senators():
     """Output a list of the members of the U.S. Senate."""
-    mbr_list = us.senators()
-    matrix = common.build_member_matrix(mbr_list)
-    tmp = '{:<20} {:<20} {}'
+    sen_list = us.senators()
+    matrix = us.build_sen_matrix(sen_list)
+    tmp = '{:<30} {:<2} {:<8} {}'
     title = 'List of Senators'
     write_term(title, tmp, matrix)
 

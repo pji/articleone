@@ -12,6 +12,8 @@ from unittest.mock import patch
 
 from articleone import cli
 from articleone import common
+from articleone import unitedstates as us
+from tests import test_unitedstates as t_us
 
 
 # Utility functions.
@@ -233,17 +235,31 @@ class SenatorsTestCase(unittest.TestCase):
         """cli.senators: The function should output a list of 
         the members of the U.S. Senate.
         """
+        args_list = [
+            ['Spam', 'Eggs', 'Democrat', 'sen', 'IL',
+             'senior', 3, 'http://eggs.senate.gov', 
+             '309-555-5555',],
+            ['Bacon', 'Baked Beans', 'Independent', 'sen', 'IL', 
+             'junior', 1, 'http://bakedbeans.senate.gov', 
+             '309-555-5555',],
+        ]
         matrix = [
             [
-                'Last Name',            # Member.last_name
-                'First Name',           # Member.first_name
-                'Party',                # Member.party
+                'Name',                 # sen.last_name, sen.first_name
+                'State',                # sen.state
+                'Rank',                 # sen.rank
+                'Party',                # sen.party
             ],
-            ['Durbin', 'Dick', 'Democrat',],
-            ['Duckworth', 'Tammy', 'Democrat',],
-            ['Sanders', 'Benard', 'Independent',],
         ]
-        tmp = '{:<20} {:<20} {}\n'
+        for args in args_list:
+            row = [
+                ', '.join((args[0], args[1])),
+                args[4],
+                args[5],
+                args[2],
+            ]
+            matrix.append(row)
+        tmp = '{:<30} {:<2} {:<8} {}\n'
         lines = ['\n',]
         lines.append('LIST OF SENATORS\n')
         lines.append('----------------\n')
@@ -253,12 +269,9 @@ class SenatorsTestCase(unittest.TestCase):
         lines.append('\n')
         expected = ''.join(lines)
         
-        args_list = []
-        for args in matrix[1:]:
-            args.append('Senate')
-            args_list.append(args)
-        mock__senators.return_value = [common.Member(*args) 
-                                       for args in args_list[1:]]
+        details = [t_us.build_senator_details(args) for args in args_list]
+        mock__senators.return_value = [us.Senator(detail) 
+                                       for detail in details] 
         mock__build_matrix.return_value = matrix
         with capture() as (out, err):
             cli.senators()
