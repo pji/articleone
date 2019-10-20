@@ -166,12 +166,33 @@ class SenatorTestCase(unittest.TestCase):
 
 
 # @unittest.skip
+class GetMembersDetailsTestCase(unittest.TestCase):
+    @patch('articleone.common.parse_json')
+    @patch('articleone.http.get')
+    def test_valid(self, mock__get, mock__parse_json):
+        """unitedstates._get_members_details: The function should 
+        return a list of dictionaries representing the members of 
+        the U.S. Congress.
+        """
+        data = [
+            ['Spam', 'Eggs', 'Democrat', 'Senate', 'IL',],
+            ['Bacon', 'Baked Beans', 'Independent', 'Senate', 'IL',],
+        ]
+        expected = [build_us_details(item) for item in data]
+        
+        mock__get.return_value = json.dumps(expected)
+        mock__parse_json.return_value = expected
+        actual = us._get_members_details()
+        
+        self.assertEqual(expected, actual)
+
+
 class MembersTestCase(unittest.TestCase):
     @patch('articleone.common.parse_json')
     @patch('articleone.http.get')
     def test_valid(self, mock__get, mock__parse_json):
         """unitedstates.members: The function should return a list 
-        of common.Member objects representin the members of U.S. 
+        of common.Member objects representing the members of U.S. 
         Congress.
         """
         data = [
@@ -213,23 +234,30 @@ class RepresentativesTestCase(unittest.TestCase):
 
 
 class SenatorsTestCase(unittest.TestCase):
-    @patch('articleone.unitedstates.members')
-    def test_valid(self, mock__members):
+    @patch('articleone.unitedstates._get_members_details')
+    def test_valid(self, mock__gmd):
         """unitedstates.senators: The function should return a 
         list of common.Member objects representing the members 
         of the U.S. Senate.
         """
         args_list = [
-            ['Spam', 'Eggs', 'Democrat', 'Senate',],
-            ['Bacon', 'Baked Beans', 'Independent', 'Senate',],
-            ['Ham', 'Tomato', 'Democrat', 'House',],
+            ['Spam', 'Eggs', 'Democrat', 'sen', 'IL',
+             'senior', 3, 'http://eggs.senate.gov', ],
+            ['Bacon', 'Baked Beans', 'Independent', 'sen', 'IL', 
+             'junior', 1, 'http://bakedbeans.senate.gov', ],
+            ['Ham', 'Tomato', 'Democrat', 'rep', 'IN',],
+        ]
+        details = [
+            build_senator_details(args_list[0]), 
+            build_senator_details(args_list[1]), 
+            build_us_details(args_list[2]),
         ]
         expected = [
-            com.Member(*args_list[0]),
-            com.Member(*args_list[1]),
+            us.Senator(details[0]),
+            us.Senator(details[1]),
         ]
         
-        mock__members.return_value = [com.Member(*args) for args in args_list]
+        mock__gmd.return_value = details
         actual = us.senators()
         
         self.assertEqual(expected, actual)

@@ -65,8 +65,7 @@ class Senator(common.Member):
 # Data gathering functions.
 def members():
     """Get a list of the members of the U.S. Congress."""
-    resp = http.get(URL)
-    details = common.parse_json(resp)
+    details = _get_members_details()
     return [common.Member.from_json(detail) for detail in details]
 
 
@@ -79,4 +78,12 @@ def representatives():
 
 def senators():
     """Get a list of the members of the U.S. Senate."""
-    return [mbr for mbr in members() if mbr.chamber == 'Senate']
+    details = _get_members_details()
+    return [Senator(detail) for detail in details 
+            if detail['terms'][-1]['type'] == 'sen']
+
+
+# Internal functions.
+def _get_members_details():
+    resp = http.get(URL)
+    return common.parse_json(resp)
