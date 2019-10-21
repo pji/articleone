@@ -91,7 +91,7 @@ def senators():
     """Output a list of the members of the U.S. Senate."""
     sen_list = us.senators()
     matrix = us.build_sen_matrix(sen_list)
-    tmp = '{:<30} {:<2} {:<8} {}'
+    tmp = '{:<30} {:<5} {:<8} {}'
     title = 'List of Senators'
     write_term(title, tmp, matrix)
 

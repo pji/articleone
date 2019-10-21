@@ -259,7 +259,7 @@ class SenatorsTestCase(unittest.TestCase):
                 args[2],
             ]
             matrix.append(row)
-        tmp = '{:<30} {:<2} {:<8} {}\n'
+        tmp = '{:<30} {:<5} {:<8} {}\n'
         lines = ['\n',]
         lines.append('LIST OF SENATORS\n')
         lines.append('----------------\n')
