@@ -372,7 +372,7 @@ class BuildSenMatrixTestCase(unittest.TestCase):
     def test_valid(self):
         """unitedstates.build_sen_matrix: Given a list of 
         unitedstates.Senator objects, return a list of rows 
-        suitable for a report on the Senator orbjects.
+        suitable for a report on the Senator objects.
         """
         args_list = [
             ['Spam', 'Eggs', 'Democrat', 'sen', 'IL',

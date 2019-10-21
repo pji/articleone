@@ -5,6 +5,8 @@ unitedstates
 The module is a client for information from the @unitedstates 
 project on GitHub.
 """
+from operator import itemgetter
+
 from articleone import common
 from articleone import http
 from articleone import model
@@ -136,7 +138,7 @@ def build_sen_matrix(sen_list):
         'Rank',                 # sen.rank
         'Party',                # sen.party
     ]
-    rows = [headers,]
+    rows = []
     for sen in sen_list:
         row = [
             ', '.join((sen.last_name, sen.first_name)),
@@ -145,7 +147,11 @@ def build_sen_matrix(sen_list):
             sen.party,
         ]
         rows.append(row)
-    return rows
+    rows = sorted(rows, key=itemgetter(1))
+    sorted(rows, key=itemgetter(2), reverse=True)
+    matrix = [headers,]
+    matrix.extend(rows)
+    return matrix
 
 
 # Internal functions.
