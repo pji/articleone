@@ -368,6 +368,43 @@ class SenatorsTestCase(unittest.TestCase):
 
 
 # Matrix building functions.
+class BuildRepMatrixTestCase(unittest.TestCase):
+    def test_valid(self):
+        """unitedstates.build_rep_matrix: Given a list of 
+        unitedstates.Representative objects, return a list of 
+        rows suitable for a report on the Representative 
+        objects.
+        """
+        args_list = [
+            ['Spam', 'Eggs', 'Democrat', 'rep', 'IL', 
+             2, 'http://spam.house.gov', '309-555-5555'],
+            ['Bacon', 'Baked Beans', 'Democrat', 'rep', 'IL', 
+             3, 'http://bacon.house.gov', '309-555-5555'],
+        ]
+        expected = [
+            [
+                'Name',         # rep.last_name, rep.first_name
+                'State',        # rep.state
+                'District',     # rep.district
+                'Party',        # rep.party
+            ],
+        ]
+        for args in args_list:
+            row = [
+                ', '.join((args[0], args[1])),
+                args[4],
+                args[5],
+                args[2],
+            ]
+            expected.append(row)
+        
+        details = [build_rep_details(args) for args in args_list]
+        rep_list = [us.Representative(detail) for detail in details]
+        actual = us.build_rep_matrix(rep_list)
+        
+        self.assertEqual(expected, actual)
+
+
 class BuildSenMatrixTestCase(unittest.TestCase):
     def test_valid(self):
         """unitedstates.build_sen_matrix: Given a list of 
@@ -382,12 +419,14 @@ class BuildSenMatrixTestCase(unittest.TestCase):
              'junior', 1, 'http://bakedbeans.senate.gov', 
              '309-555-5555',],
         ]
-        expected = [[
-            'Name',                 # sen.last_name, sen.first_name
-            'State',                # sen.state
-            'Rank',                 # sen.rank
-            'Party',                # sen.party
-        ],]
+        expected = [
+            [
+                'Name',                 # sen.last_name, sen.first_name
+                'State',                # sen.state
+                'Rank',                 # sen.rank
+                'Party',                # sen.party
+            ],
+        ]
         for args in args_list:
             row = [
                 ', '.join((args[0], args[1])),

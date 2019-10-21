@@ -130,6 +130,31 @@ def senators():
 
 
 # Matrix building functions.
+def build_rep_matrix(rep_list):
+    """Return a matrix of information on the given Representative 
+    objects.
+    """
+    headers = [
+        'Name',                 # rep.last_name, sen.first_name
+        'State',                # rep.state
+        'District',             # rep.district
+        'Party',                # rep.party
+    ]
+    rows = []
+    for rep in rep_list:
+        row = [
+            ', '.join((rep.last_name, rep.first_name)),
+            rep.state,
+            rep.district,
+            rep.party,
+        ]
+        rows.append(row)
+    rows = sorted(rows, key=itemgetter(1, 2))
+    matrix = [headers,]
+    matrix.extend(rows)
+    return matrix
+
+
 def build_sen_matrix(sen_list):
     """Return a matrix of information on the given Senator objects."""
     headers = [

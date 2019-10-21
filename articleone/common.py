@@ -24,7 +24,7 @@ STATES = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
           'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 
           'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 
           'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 
-          None,)
+          'DC', 'MP', 'VI', 'AS', 'PR', 'GU', None,)
 
 
 # Common object validator functions.
@@ -47,6 +47,9 @@ def val_party(self, value):
 def val_state(self, value):
     if value not in STATES:
         reason = 'not a valid state postal abbreviation'
+        print('+-----+')
+        print(value)
+        print('+-----+')
         raise ValueError(self.msg.format(reason))
     return value
 
