@@ -80,9 +80,9 @@ def representatives():
     """Output a list of the members of the U.S. House of 
     Representatives.
     """
-    mbr_list = us.representatives()
-    matrix = common.build_member_matrix(mbr_list)
-    tmp = '{:<20} {:<20} {}'
+    rep_list = us.representatives()
+    matrix = us.build_rep_matrix(rep_list)
+    tmp = '{:<30} {:<5} {:>8} {}'
     title = 'List of Representatives'
     write_term(title, tmp, matrix)
 
